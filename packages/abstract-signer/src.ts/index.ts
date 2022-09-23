@@ -233,61 +233,61 @@ export abstract class Signer {
         } else {
 
             // We need to get fee data to determine things
-            const feeData = await this.getFeeData();
-
-            if (tx.type == null) {
-                // We need to auto-detect the intended type of this transaction...
-
-                if (feeData.maxFeePerGas != null && feeData.maxPriorityFeePerGas != null) {
-                    // The network supports EIP-1559!
-
-                    // Upgrade transaction from null to eip-1559
-                    tx.type = 2;
-
-                    if (tx.gasPrice != null) {
-                        // Using legacy gasPrice property on an eip-1559 network,
-                        // so use gasPrice as both fee properties
-                        const gasPrice = tx.gasPrice;
-                        delete tx.gasPrice;
-                        tx.maxFeePerGas = gasPrice;
-                        tx.maxPriorityFeePerGas = gasPrice;
-
-                    } else {
-                        // Populate missing fee data
-                        if (tx.maxFeePerGas == null) { tx.maxFeePerGas = feeData.maxFeePerGas; }
-                        if (tx.maxPriorityFeePerGas == null) { tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas; }
-                    }
-
-                } else if (feeData.gasPrice != null) {
-                    // Network doesn't support EIP-1559...
-
-                    // ...but they are trying to use EIP-1559 properties
-                    if (hasEip1559) {
-                        logger.throwError("network does not support EIP-1559", Logger.errors.UNSUPPORTED_OPERATION, {
-                            operation: "populateTransaction"
-                        });
-                    }
-
-                    // Populate missing fee data
-                    if (tx.gasPrice == null) { tx.gasPrice = feeData.gasPrice; }
-
-                    // Explicitly set untyped transaction to legacy
-                    tx.type = 0;
-
-                } else {
-                    // getFeeData has failed us.
-                    logger.throwError("failed to get consistent fee data", Logger.errors.UNSUPPORTED_OPERATION, {
-                        operation: "signer.getFeeData"
-                    });
-                }
-
-            } else if (tx.type === 2) {
-                // Explicitly using EIP-1559
-
-                // Populate missing fee data
-                if (tx.maxFeePerGas == null) { tx.maxFeePerGas = feeData.maxFeePerGas; }
-                if (tx.maxPriorityFeePerGas == null) { tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas; }
-            }
+            // const feeData = await this.getFeeData();
+            //
+            // if (tx.type == null) {
+            //     // We need to auto-detect the intended type of this transaction...
+            //
+            //     if (feeData.maxFeePerGas != null && feeData.maxPriorityFeePerGas != null) {
+            //         // The network supports EIP-1559!
+            //
+            //         // Upgrade transaction from null to eip-1559
+            //         tx.type = 2;
+            //
+            //         if (tx.gasPrice != null) {
+            //             // Using legacy gasPrice property on an eip-1559 network,
+            //             // so use gasPrice as both fee properties
+            //             const gasPrice = tx.gasPrice;
+            //             delete tx.gasPrice;
+            //             tx.maxFeePerGas = gasPrice;
+            //             tx.maxPriorityFeePerGas = gasPrice;
+            //
+            //         } else {
+            //             // Populate missing fee data
+            //             if (tx.maxFeePerGas == null) { tx.maxFeePerGas = feeData.maxFeePerGas; }
+            //             if (tx.maxPriorityFeePerGas == null) { tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas; }
+            //         }
+            //
+            //     } else if (feeData.gasPrice != null) {
+            //         // Network doesn't support EIP-1559...
+            //
+            //         // ...but they are trying to use EIP-1559 properties
+            //         if (hasEip1559) {
+            //             logger.throwError("network does not support EIP-1559", Logger.errors.UNSUPPORTED_OPERATION, {
+            //                 operation: "populateTransaction"
+            //             });
+            //         }
+            //
+            //         // Populate missing fee data
+            //         if (tx.gasPrice == null) { tx.gasPrice = feeData.gasPrice; }
+            //
+            //         // Explicitly set untyped transaction to legacy
+            //         tx.type = 0;
+            //
+            //     } else {
+            //         // getFeeData has failed us.
+            //         logger.throwError("failed to get consistent fee data", Logger.errors.UNSUPPORTED_OPERATION, {
+            //             operation: "signer.getFeeData"
+            //         });
+            //     }
+            //
+            // } else if (tx.type === 2) {
+            //     // Explicitly using EIP-1559
+            //
+            //     // Populate missing fee data
+            //     if (tx.maxFeePerGas == null) { tx.maxFeePerGas = feeData.maxFeePerGas; }
+            //     if (tx.maxPriorityFeePerGas == null) { tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas; }
+            // }
         }
 
         if (tx.nonce == null) { tx.nonce = this.getTransactionCount("pending"); }
